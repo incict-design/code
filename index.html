@@ -81,7 +81,7 @@ iframe {
   </div>
   <div><strong>HTMLエディタ＆プレビュー</strong></div>
   <div>
-    <button id="shareBtn" title="共有">📤</button>
+    <button id="downloadBtn" title="ダウンロード">💾</button>
   </div>
 </header>
 
@@ -105,14 +105,14 @@ const editor = document.getElementById("editor");
 const preview = document.getElementById("preview");
 const undoBtn = document.getElementById("undoBtn");
 const redoBtn = document.getElementById("redoBtn");
-const shareBtn = document.getElementById("shareBtn");
+const downloadBtn = document.getElementById("downloadBtn");
 const editTab = document.getElementById("editTab");
 const previewTab = document.getElementById("previewTab");
 
 let history = [];
 let index = -1;
 
-// 保存
+// 履歴に保存
 function saveToHistory() {
   const current = editor.value;
   if (history[index] !== current) {
@@ -151,7 +151,7 @@ window.onload = () => {
   saveToHistory();
 };
 
-// 入力変更時
+// 入力時に自動保存
 let typingTimer;
 editor.addEventListener("input", () => {
   clearTimeout(typingTimer);
@@ -173,19 +173,17 @@ previewTab.onclick = () => {
   preview.srcdoc = editor.value;
 };
 
-// 共有
-shareBtn.onclick = async () => {
-  const html = editor.value;
-  try {
-    await navigator.share({ text: html });
-  } catch (e) {
-    // Fallback: コピー
-    await navigator.clipboard.writeText(html);
-    alert("共有できない環境です。HTMLコードをコピーしました。");
-  }
+// ダウンロード処理
+downloadBtn.onclick = () => {
+  const blob = new Blob([editor.value], { type: "text/html" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "my_page.html";
+  a.click();
+  URL.revokeObjectURL(a.href);
 };
 
-// Undo / Redoボタン
+// Undo / Redoボタン動作
 undoBtn.onclick = undo;
 redoBtn.onclick = redo;
 </script>
