@@ -62,6 +62,34 @@ iframe {
 }
 header div.title {
   font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* 目立つ戻る・進むボタン */
+#undoRedo button {
+  background-color: #007AFF;
+  color: white;
+  border: none;
+  font-size: 1.5em;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  margin-right: 8px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+#undoRedo button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+#redoBtn {
+  background-color: #28A745; /* 緑 */
+}
+#undoRedo button:disabled {
+  background-color: #aaa;
+  color: #eee;
+  box-shadow: none;
+  transform: none;
 }
 </style>
 </head>
@@ -72,7 +100,7 @@ header div.title {
     <button id="undoBtn" title="元に戻す">⤺</button>
     <button id="redoBtn" title="やり直す">⤻</button>
   </div>
-  <div class="title">HTMLエディタ＆プレビュー（2画面）</div>
+  <div class="title">HTMLエディタ＆プレビュー</div>
   <div>
     <button id="downloadBtn" title="ダウンロード">💾</button>
   </div>
@@ -177,3 +205,4 @@ redoBtn.onclick = redo;
 
 </body>
 </html>
+
