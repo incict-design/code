@@ -54,7 +54,6 @@ main {
   resize: none;
   border: none;
   outline: none;
-  font-size: 15px;
 }
 iframe {
   flex: 1;
@@ -70,11 +69,11 @@ header div.title {
 
 <header>
   <div id="undoRedo">
-    <button id="undoBtn" title="戻る">⤺</button>
-    <button id="redoBtn" title="進む">⤻</button>
+    <button id="undoBtn" title="元に戻す">⤺</button>
+    <button id="redoBtn" title="やり直す">⤻</button>
   </div>
   <div class="title">HTMLエディタ＆プレビュー（2画面）</div>
-  <div></div>
+  <div></div> <!-- 右側の空スペース -->
 </header>
 
 <main>
@@ -101,10 +100,9 @@ const redoBtn = document.getElementById("redoBtn");
 let history = [];
 let index = -1;
 
-// 履歴に追加
+// 履歴に保存
 function saveToHistory() {
   const current = editor.value;
-  // 直前と同じなら記録しない
   if (history[index] !== current) {
     history = history.slice(0, index + 1);
     history.push(current);
@@ -114,12 +112,7 @@ function saveToHistory() {
   }
 }
 
-// プレビュー更新
-function updatePreview() {
-  preview.srcdoc = editor.value;
-}
-
-// 「戻る」
+// Undo / Redo
 function undo() {
   if (index > 0) {
     index--;
@@ -128,8 +121,6 @@ function undo() {
     updatePreview();
   }
 }
-
-// 「進む」
 function redo() {
   if (index < history.length - 1) {
     index++;
@@ -138,14 +129,17 @@ function redo() {
     updatePreview();
   }
 }
-
-// ボタン状態更新
 function updateButtons() {
   undoBtn.disabled = index <= 0;
   redoBtn.disabled = index >= history.length - 1;
 }
 
-// 初期化処理
+// プレビュー更新
+function updatePreview() {
+  preview.srcdoc = editor.value;
+}
+
+// 初期化
 window.onload = () => {
   const saved = localStorage.getItem("savedHTML");
   if (saved) editor.value = saved;
@@ -153,7 +147,7 @@ window.onload = () => {
   updatePreview();
 };
 
-// 入力中に自動履歴追加・プレビュー更新
+// 入力時に自動保存＆プレビュー更新
 let typingTimer;
 editor.addEventListener("input", () => {
   clearTimeout(typingTimer);
@@ -163,20 +157,9 @@ editor.addEventListener("input", () => {
   }, 300);
 });
 
-// ボタンの動作
+// Undo / Redoボタン動作
 undoBtn.onclick = undo;
 redoBtn.onclick = redo;
-
-// ショートカットキーでも操作可能
-editor.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.key === "z") { // Ctrl+Z
-    e.preventDefault();
-    undo();
-  } else if (e.ctrlKey && (e.key === "y" || (e.shiftKey && e.key === "Z"))) { // Ctrl+Y or Ctrl+Shift+Z
-    e.preventDefault();
-    redo();
-  }
-});
 </script>
 
 </body>
