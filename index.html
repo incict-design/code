@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTMLエディタ＆プレビュー</title>
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f5f5f5;
+  border-bottom: 1px solid #ccc;
+  padding: 8px 12px;
+}
+button {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #007AFF;
+}
+button:disabled {
+  color: gray;
+  cursor: not-allowed;
+}
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+#tabs {
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid #ccc;
+  background: #fafafa;
+}
+#tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-weight: bold;
+}
+#tabs button.active {
+  border-bottom: 3px solid #007AFF;
+  background: #fff;
+}
+#editor, #preview {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+#editor {
+  font-family: monospace;
+  padding: 10px;
+  resize: none;
+  border: none;
+  outline: none;
+}
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div id="undoRedo">
+    <button id="undoBtn" title="元に戻す">⤺</button>
+    <button id="redoBtn" title="やり直す">⤻</button>
+  </div>
+  <div><strong>HTMLエディタ＆プレビュー</strong></div>
+  <div>
+    <button id="shareBtn" title="共有">📤</button>
+  </div>
+</header>
+
+<div id="tabs">
+  <button id="editTab" class="active">エディタ</button>
+  <button id="previewTab">プレビュー</button>
+</div>
+
+<div id="main">
+  <textarea id="editor"><!DOCTYPE html>
+<html>
+<body>
+  <h1>Hello, World!</h1>
+</body>
+</html></textarea>
+  <iframe id="preview" style="display:none;"></iframe>
+</div>
+
+<script>
+const editor = document.getElementById("editor");
+const preview = document.getElementById("preview");
+const undoBtn = document.getElementById("undoBtn");
+const redoBtn = document.getElementById("redoBtn");
+const shareBtn = document.getElementById("shareBtn");
+const editTab = document.getElementById("editTab");
+const previewTab = document.getElementById("previewTab");
+
+let history = [];
+let index = -1;
+
+// 保存
+function saveToHistory() {
+  const current = editor.value;
+  if (history[index] !== current) {
+    history = history.slice(0, index + 1);
+    history.push(current);
+    index = history.length - 1;
+    updateButtons();
+    localStorage.setItem("savedHTML", current);
+  }
+}
+
+// Undo / Redo
+function undo() {
+  if (index > 0) {
+    index--;
+    editor.value = history[index];
+    updateButtons();
+  }
+}
+function redo() {
+  if (index < history.length - 1) {
+    index++;
+    editor.value = history[index];
+    updateButtons();
+  }
+}
+function updateButtons() {
+  undoBtn.disabled = index <= 0;
+  redoBtn.disabled = index >= history.length - 1;
+}
+
+// 初期化
+window.onload = () => {
+  const saved = localStorage.getItem("savedHTML");
+  if (saved) editor.value = saved;
+  saveToHistory();
+};
+
+// 入力変更時
+let typingTimer;
+editor.addEventListener("input", () => {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(saveToHistory, 400);
+});
+
+// タブ切り替え
+editTab.onclick = () => {
+  editTab.classList.add("active");
+  previewTab.classList.remove("active");
+  editor.style.display = "block";
+  preview.style.display = "none";
+};
+previewTab.onclick = () => {
+  previewTab.classList.add("active");
+  editTab.classList.remove("active");
+  preview.style.display = "block";
+  editor.style.display = "none";
+  preview.srcdoc = editor.value;
+};
+
+// 共有
+shareBtn.onclick = async () => {
+  const html = editor.value;
+  try {
+    await navigator.share({ text: html });
+  } catch (e) {
+    // Fallback: コピー
+    await navigator.clipboard.writeText(html);
+    alert("共有できない環境です。HTMLコードをコピーしました。");
+  }
+};
+
+// Undo / Redoボタン
+undoBtn.onclick = undo;
+redoBtn.onclick = redo;
+</script>
+
+</body>
+</html>
