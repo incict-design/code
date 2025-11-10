@@ -18,36 +18,34 @@ header {
   justify-content: space-between;
   background: linear-gradient(to right, #007AFF, #00C6FF);
   color: white;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 2px solid #005BB5;
   padding: 10px 16px;
-}
-header .title {
-  font-weight: bold;
-  font-size: 1.1em;
-  letter-spacing: 0.5px;
 }
 #undoRedo {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 button {
   background: white;
-  border: none;
-  color: #007AFF;
+  border: 2px solid #007AFF;
   font-size: 1.4em;
-  padding: 8px 14px;
-  border-radius: 8px;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 8px 16px;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  color: #007AFF;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
 }
 button:hover {
-  background: #e6f0ff;
-  transform: scale(1.05);
+  background: #007AFF;
+  color: white;
+  transform: scale(1.1);
 }
 button:disabled {
-  background: #eee;
+  background: #e0e0e0;
   color: gray;
+  border-color: gray;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
@@ -82,17 +80,21 @@ iframe {
   width: 100%;
   border: none;
 }
+header div.title {
+  font-weight: bold;
+  font-size: 1.1em;
+}
 </style>
 </head>
 <body>
 
 <header>
   <div id="undoRedo">
-    <button id="undoBtn" title="戻る（Ctrl + Z）">⤺ 戻る</button>
-    <button id="redoBtn" title="進む（Ctrl + Y）">進む ⤻</button>
+    <button id="undoBtn" title="元に戻す">⤺ 戻る</button>
+    <button id="redoBtn" title="やり直す">進む ⤻</button>
   </div>
   <div class="title">HTMLエディタ＆プレビュー（2画面）</div>
-  <div></div>
+  <div></div> <!-- 右側の空スペース -->
 </header>
 
 <main>
@@ -119,7 +121,7 @@ const redoBtn = document.getElementById("redoBtn");
 let history = [];
 let index = -1;
 
-// 履歴に追加
+// 履歴に保存
 function saveToHistory() {
   const current = editor.value;
   if (history[index] !== current) {
@@ -131,12 +133,7 @@ function saveToHistory() {
   }
 }
 
-// プレビュー更新
-function updatePreview() {
-  preview.srcdoc = editor.value;
-}
-
-// 「戻る」
+// Undo / Redo
 function undo() {
   if (index > 0) {
     index--;
@@ -145,8 +142,6 @@ function undo() {
     updatePreview();
   }
 }
-
-// 「進む」
 function redo() {
   if (index < history.length - 1) {
     index++;
@@ -155,14 +150,17 @@ function redo() {
     updatePreview();
   }
 }
-
-// ボタン状態更新
 function updateButtons() {
   undoBtn.disabled = index <= 0;
   redoBtn.disabled = index >= history.length - 1;
 }
 
-// 初期化処理
+// プレビュー更新
+function updatePreview() {
+  preview.srcdoc = editor.value;
+}
+
+// 初期化
 window.onload = () => {
   const saved = localStorage.getItem("savedHTML");
   if (saved) editor.value = saved;
@@ -170,7 +168,7 @@ window.onload = () => {
   updatePreview();
 };
 
-// 入力中に自動履歴追加・プレビュー更新
+// 入力時に自動保存＆プレビュー更新
 let typingTimer;
 editor.addEventListener("input", () => {
   clearTimeout(typingTimer);
@@ -180,22 +178,10 @@ editor.addEventListener("input", () => {
   }, 300);
 });
 
-// ボタン操作
+// Undo / Redoボタン動作
 undoBtn.onclick = undo;
 redoBtn.onclick = redo;
-
-// ショートカットキー
-editor.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.key === "z") {
-    e.preventDefault();
-    undo();
-  } else if (e.ctrlKey && (e.key === "y" || (e.shiftKey && e.key === "Z"))) {
-    e.preventDefault();
-    redo();
-  }
-});
 </script>
 
 </body>
 </html>
-
