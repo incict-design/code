@@ -101,9 +101,7 @@ header div.title {
     <button id="redoBtn" title="やり直す">⤻</button>
   </div>
   <div class="title">HTMLエディタ＆プレビュー</div>
-  <div>
-    <button id="downloadBtn" title="ダウンロード">💾</button>
-  </div>
+  
 </header>
 
 <main>
@@ -126,7 +124,7 @@ const editor = document.getElementById("editor");
 const preview = document.getElementById("preview");
 const undoBtn = document.getElementById("undoBtn");
 const redoBtn = document.getElementById("redoBtn");
-const downloadBtn = document.getElementById("downloadBtn");
+
 
 let history = [];
 let index = -1;
@@ -188,15 +186,7 @@ editor.addEventListener("input", () => {
   }, 300);
 });
 
-// ダウンロード
-downloadBtn.onclick = () => {
-  const blob = new Blob([editor.value], { type: "text/html" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "my_page.html";
-  a.click();
-  URL.revokeObjectURL(a.href);
-};
+
 
 // Undo / Redoボタン
 undoBtn.onclick = undo;
