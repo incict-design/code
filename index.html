@@ -8,9 +8,9 @@
 body {
   font-family: "Segoe UI", sans-serif;
   margin: 0;
-  height: 100vh;
   display: flex;
   flex-direction: column;
+  height: 100vh;
 }
 header {
   display: flex;
@@ -31,24 +31,34 @@ button:disabled {
   color: gray;
   cursor: not-allowed;
 }
-main {
-  flex: 1;
-  display: flex;
-  height: 100%;
-}
-#editorContainer, #previewContainer {
+#main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
-#editorContainer {
-  border-right: 1px solid #ccc;
+#tabs {
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid #ccc;
+  background: #fafafa;
 }
-#editor {
+#tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-weight: bold;
+}
+#tabs button.active {
+  border-bottom: 3px solid #007AFF;
+  background: #fff;
+}
+#editor, #preview {
   flex: 1;
   width: 100%;
   box-sizing: border-box;
+}
+#editor {
   font-family: monospace;
   padding: 10px;
   resize: none;
@@ -56,12 +66,9 @@ main {
   outline: none;
 }
 iframe {
-  flex: 1;
   width: 100%;
+  height: 100%;
   border: none;
-}
-header div.title {
-  font-weight: bold;
 }
 </style>
 </head>
@@ -72,35 +79,40 @@ header div.title {
     <button id="undoBtn" title="元に戻す">⤺</button>
     <button id="redoBtn" title="やり直す">⤻</button>
   </div>
-  <div class="title">HTMLエディタ＆プレビュー（2画面）</div>
-  <div></div> <!-- 右側の空スペース -->
+  <div><strong>HTMLエディタ＆プレビュー</strong></div>
+  <div>
+    <button id="shareBtn" title="共有">📤</button>
+  </div>
 </header>
 
-<main>
-  <div id="editorContainer">
-    <textarea id="editor"><!DOCTYPE html>
+<div id="tabs">
+  <button id="editTab" class="active">エディタ</button>
+  <button id="previewTab">プレビュー</button>
+</div>
+
+<div id="main">
+  <textarea id="editor"><!DOCTYPE html>
 <html>
 <body>
   <h1>Hello, World!</h1>
-  <p>このエディタで編集すると右側にリアルタイムで反映されます。</p>
 </body>
 </html></textarea>
-  </div>
-  <div id="previewContainer">
-    <iframe id="preview"></iframe>
-  </div>
-</main>
+  <iframe id="preview" style="display:none;"></iframe>
+</div>
 
 <script>
 const editor = document.getElementById("editor");
 const preview = document.getElementById("preview");
 const undoBtn = document.getElementById("undoBtn");
 const redoBtn = document.getElementById("redoBtn");
+const shareBtn = document.getElementById("shareBtn");
+const editTab = document.getElementById("editTab");
+const previewTab = document.getElementById("previewTab");
 
 let history = [];
 let index = -1;
 
-// 履歴に保存
+// 保存
 function saveToHistory() {
   const current = editor.value;
   if (history[index] !== current) {
@@ -118,7 +130,6 @@ function undo() {
     index--;
     editor.value = history[index];
     updateButtons();
-    updatePreview();
   }
 }
 function redo() {
@@ -126,7 +137,6 @@ function redo() {
     index++;
     editor.value = history[index];
     updateButtons();
-    updatePreview();
   }
 }
 function updateButtons() {
@@ -134,30 +144,48 @@ function updateButtons() {
   redoBtn.disabled = index >= history.length - 1;
 }
 
-// プレビュー更新
-function updatePreview() {
-  preview.srcdoc = editor.value;
-}
-
 // 初期化
 window.onload = () => {
   const saved = localStorage.getItem("savedHTML");
   if (saved) editor.value = saved;
   saveToHistory();
-  updatePreview();
 };
 
-// 入力時に自動保存＆プレビュー更新
+// 入力変更時
 let typingTimer;
 editor.addEventListener("input", () => {
   clearTimeout(typingTimer);
-  typingTimer = setTimeout(() => {
-    saveToHistory();
-    updatePreview();
-  }, 300);
+  typingTimer = setTimeout(saveToHistory, 400);
 });
 
-// Undo / Redoボタン動作
+// タブ切り替え
+editTab.onclick = () => {
+  editTab.classList.add("active");
+  previewTab.classList.remove("active");
+  editor.style.display = "block";
+  preview.style.display = "none";
+};
+previewTab.onclick = () => {
+  previewTab.classList.add("active");
+  editTab.classList.remove("active");
+  preview.style.display = "block";
+  editor.style.display = "none";
+  preview.srcdoc = editor.value;
+};
+
+// 共有
+shareBtn.onclick = async () => {
+  const html = editor.value;
+  try {
+    await navigator.share({ text: html });
+  } catch (e) {
+    // Fallback: コピー
+    await navigator.clipboard.writeText(html);
+    alert("共有できない環境です。HTMLコードをコピーしました。");
+  }
+};
+
+// Undo / Redoボタン
 undoBtn.onclick = undo;
 redoBtn.onclick = redo;
 </script>
