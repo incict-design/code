@@ -16,20 +16,41 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f5f5f5;
+  background: linear-gradient(to right, #007AFF, #00C6FF);
+  color: white;
   border-bottom: 1px solid #ccc;
-  padding: 8px 12px;
+  padding: 10px 16px;
+}
+header .title {
+  font-weight: bold;
+  font-size: 1.1em;
+  letter-spacing: 0.5px;
+}
+#undoRedo {
+  display: flex;
+  gap: 10px;
 }
 button {
-  background: none;
+  background: white;
   border: none;
-  font-size: 1.2em;
-  cursor: pointer;
   color: #007AFF;
+  font-size: 1.4em;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+button:hover {
+  background: #e6f0ff;
+  transform: scale(1.05);
 }
 button:disabled {
+  background: #eee;
   color: gray;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 main {
   flex: 1;
@@ -43,7 +64,7 @@ main {
   height: 100%;
 }
 #editorContainer {
-  border-right: 1px solid #ccc;
+  border-right: 2px solid #007AFF;
 }
 #editor {
   flex: 1;
@@ -61,17 +82,14 @@ iframe {
   width: 100%;
   border: none;
 }
-header div.title {
-  font-weight: bold;
-}
 </style>
 </head>
 <body>
 
 <header>
   <div id="undoRedo">
-    <button id="undoBtn" title="戻る">⤺</button>
-    <button id="redoBtn" title="進む">⤻</button>
+    <button id="undoBtn" title="戻る（Ctrl + Z）">⤺ 戻る</button>
+    <button id="redoBtn" title="進む（Ctrl + Y）">進む ⤻</button>
   </div>
   <div class="title">HTMLエディタ＆プレビュー（2画面）</div>
   <div></div>
@@ -104,7 +122,6 @@ let index = -1;
 // 履歴に追加
 function saveToHistory() {
   const current = editor.value;
-  // 直前と同じなら記録しない
   if (history[index] !== current) {
     history = history.slice(0, index + 1);
     history.push(current);
@@ -163,16 +180,16 @@ editor.addEventListener("input", () => {
   }, 300);
 });
 
-// ボタンの動作
+// ボタン操作
 undoBtn.onclick = undo;
 redoBtn.onclick = redo;
 
-// ショートカットキーでも操作可能
+// ショートカットキー
 editor.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.key === "z") { // Ctrl+Z
+  if (e.ctrlKey && e.key === "z") {
     e.preventDefault();
     undo();
-  } else if (e.ctrlKey && (e.key === "y" || (e.shiftKey && e.key === "Z"))) { // Ctrl+Y or Ctrl+Shift+Z
+  } else if (e.ctrlKey && (e.key === "y" || (e.shiftKey && e.key === "Z"))) {
     e.preventDefault();
     redo();
   }
@@ -181,3 +198,4 @@ editor.addEventListener("keydown", (e) => {
 
 </body>
 </html>
+
